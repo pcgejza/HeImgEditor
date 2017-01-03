@@ -153,8 +153,7 @@
             var url;
 
             if ($this.is('img')) {
-                this.isImg = true;
-
+                
                 // Should use `$.fn.attr` here. e.g.: "img/picture.jpg"
                 this.originalUrl = url = $this.attr('src');
 
@@ -204,10 +203,6 @@
             if (!options.checkOrientation || !ArrayBuffer) {
                 return this.clone();
             }
-            console.log('zsi2r');
-
-            return;
-
 
             read = $.proxy(this.read, this);
 
@@ -262,29 +257,16 @@
             this.crossOriginUrl = crossOriginUrl;
             this.$clone = $clone = $('<img' + getCrossOrigin(crossOrigin) + ' src="' + (crossOriginUrl || url) + '">');
 
-            if (this.isImg) {
-                if ($this[0].complete) {
-                    this.start();
-                } else {
-                    $this.one(EVENT_LOAD, $.proxy(this.start, this));
-                }
+            if ($this[0].complete) {
+                this.start();
             } else {
-                $clone.
-                        one(EVENT_LOAD, $.proxy(this.start, this)).
-                        one(EVENT_ERROR, $.proxy(this.stop, this)).
-                        addClass(CLASS_HIDE).
-                        insertAfter($this);
+                $this.one(EVENT_LOAD, $.proxy(this.start, this));
             }
         },
 
         start: function () {
             var $image = this.$element;
             var $clone = this.$clone;
-
-            if (!this.isImg) {
-                $clone.off(EVENT_ERROR, this.stop);
-                $image = $clone;
-            }
 
             getImageSize($image[0], $.proxy(function (naturalWidth, naturalHeight) {
                 $.extend(this.image, {
@@ -294,7 +276,6 @@
                 });
 
                 this.isLoaded = true;
-                console.log(naturalWidth);
             }, this));
         },
 

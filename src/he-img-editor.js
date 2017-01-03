@@ -343,6 +343,7 @@
         render: function () {
             this.initContainer();
             this.initCanvas();
+            this.renderCanvas();
         },
 
         initContainer: function () {
@@ -353,7 +354,7 @@
 
             $heImgEditor.addClass(CLASS_HIDDEN);
             $this.removeClass(CLASS_HIDDEN);
- 
+
             $heImgEditor.css((this.container = {
                 width: max($container.width(), num(options.minContainerWidth) || 200),
                 height: max($container.height(), num(options.minContainerHeight) || 100)
@@ -363,8 +364,233 @@
             $heImgEditor.removeClass(CLASS_HIDDEN);
         },
 
-        initCanvas: function () { 
-            
+        // Canvas (image wrapper)
+        initCanvas: function () {
+            var viewMode = this.options.viewMode;
+            var container = this.container;
+            var containerWidth = container.width;
+            var containerHeight = container.height;
+            var image = this.image;
+            var imageNaturalWidth = image.naturalWidth;
+            var imageNaturalHeight = image.naturalHeight;
+            var is90Degree = abs(image.rotate) === 90;
+            var naturalWidth = is90Degree ? imageNaturalHeight : imageNaturalWidth;
+            var naturalHeight = is90Degree ? imageNaturalWidth : imageNaturalHeight;
+            var aspectRatio = naturalWidth / naturalHeight;
+            var canvasWidth = containerWidth;
+            var canvasHeight = containerHeight;
+            var canvas;
+
+            if (containerHeight * aspectRatio > containerWidth) {
+                if (viewMode === 3) {
+                    canvasWidth = containerHeight * aspectRatio;
+                } else {
+                    canvasHeight = containerWidth / aspectRatio;
+                }
+            } else {
+                if (viewMode === 3) {
+                    canvasHeight = containerWidth / aspectRatio;
+                } else {
+                    canvasWidth = containerHeight * aspectRatio;
+                }
+            }
+
+            canvas = {
+                naturalWidth: naturalWidth,
+                naturalHeight: naturalHeight,
+                aspectRatio: aspectRatio,
+                width: canvasWidth,
+                height: canvasHeight
+            };
+
+            canvas.oldLeft = canvas.left = (containerWidth - canvasWidth) / 2;
+            canvas.oldTop = canvas.top = (containerHeight - canvasHeight) / 2;
+
+            this.canvas = canvas;
+            this.isLimited = (viewMode === 1 || viewMode === 2);
+
+            this.limitCanvas(true, true);
+            this.initialImage = $.extend({}, image);
+            this.initialCanvas = $.extend({}, canvas);
+        },
+
+        limitCanvas: function (isSizeLimited, isPositionLimited) {
+            var options = this.options;
+            var viewMode = options.viewMode;
+            var container = this.container;
+            var containerWidth = container.width;
+            var containerHeight = container.height;
+            var canvas = this.canvas;
+            var aspectRatio = canvas.aspectRatio;
+            var cropBox = this.cropBox;
+            var isCropped = this.isCropped && cropBox;
+            var minCanvasWidth;
+            var minCanvasHeight;
+            var newCanvasLeft;
+            var newCanvasTop;
+
+            if (isSizeLimited) {
+                minCanvasWidth = num(options.minCanvasWidth) || 0;
+                minCanvasHeight = num(options.minCanvasHeight) || 0;
+
+                if (viewMode) {
+                    if (viewMode > 1) {
+                        minCanvasWidth = max(minCanvasWidth, containerWidth);
+                        minCanvasHeight = max(minCanvasHeight, containerHeight);
+
+                        if (viewMode === 3) {
+                            if (minCanvasHeight * aspectRatio > minCanvasWidth) {
+                                minCanvasWidth = minCanvasHeight * aspectRatio;
+                            } else {
+                                minCanvasHeight = minCanvasWidth / aspectRatio;
+                            }
+                        }
+                    } else {
+                        if (minCanvasWidth) {
+                            minCanvasWidth = max(minCanvasWidth, isCropped ? cropBox.width : 0);
+                        } else if (minCanvasHeight) {
+                            minCanvasHeight = max(minCanvasHeight, isCropped ? cropBox.height : 0);
+                        } else if (isCropped) {
+                            minCanvasWidth = cropBox.width;
+                            minCanvasHeight = cropBox.height;
+
+                            if (minCanvasHeight * aspectRatio > minCanvasWidth) {
+                                minCanvasWidth = minCanvasHeight * aspectRatio;
+                            } else {
+                                minCanvasHeight = minCanvasWidth / aspectRatio;
+                            }
+                        }
+                    }
+                }
+
+                if (minCanvasWidth && minCanvasHeight) {
+                    if (minCanvasHeight * aspectRatio > minCanvasWidth) {
+                        minCanvasHeight = minCanvasWidth / aspectRatio;
+                    } else {
+                        minCanvasWidth = minCanvasHeight * aspectRatio;
+                    }
+                } else if (minCanvasWidth) {
+                    minCanvasHeight = minCanvasWidth / aspectRatio;
+                } else if (minCanvasHeight) {
+                    minCanvasWidth = minCanvasHeight * aspectRatio;
+                }
+
+                canvas.minWidth = minCanvasWidth;
+                canvas.minHeight = minCanvasHeight;
+                canvas.maxWidth = Infinity;
+                canvas.maxHeight = Infinity;
+            }
+
+            if (isPositionLimited) {
+                if (viewMode) {
+                    newCanvasLeft = containerWidth - canvas.width;
+                    newCanvasTop = containerHeight - canvas.height;
+
+                    canvas.minLeft = min(0, newCanvasLeft);
+                    canvas.minTop = min(0, newCanvasTop);
+                    canvas.maxLeft = max(0, newCanvasLeft);
+                    canvas.maxTop = max(0, newCanvasTop);
+
+                    if (isCropped && this.isLimited) {
+                        canvas.minLeft = min(
+                                cropBox.left,
+                                cropBox.left + cropBox.width - canvas.width
+                                );
+                        canvas.minTop = min(
+                                cropBox.top,
+                                cropBox.top + cropBox.height - canvas.height
+                                );
+                        canvas.maxLeft = cropBox.left;
+                        canvas.maxTop = cropBox.top;
+
+                        if (viewMode === 2) {
+                            if (canvas.width >= containerWidth) {
+                                canvas.minLeft = min(0, newCanvasLeft);
+                                canvas.maxLeft = max(0, newCanvasLeft);
+                            }
+
+                            if (canvas.height >= containerHeight) {
+                                canvas.minTop = min(0, newCanvasTop);
+                                canvas.maxTop = max(0, newCanvasTop);
+                            }
+                        }
+                    }
+                } else {
+                    canvas.minLeft = -canvas.width;
+                    canvas.minTop = -canvas.height;
+                    canvas.maxLeft = containerWidth;
+                    canvas.maxTop = containerHeight;
+                }
+            }
+        },
+
+        renderCanvas: function (isChanged) {
+            var canvas = this.canvas;
+            var image = this.image;
+            var rotate = image.rotate;
+            var naturalWidth = image.naturalWidth;
+            var naturalHeight = image.naturalHeight;
+            var aspectRatio;
+            var rotated;
+
+            if (canvas.width > canvas.maxWidth || canvas.width < canvas.minWidth) {
+                canvas.left = canvas.oldLeft;
+            }
+
+            if (canvas.height > canvas.maxHeight || canvas.height < canvas.minHeight) {
+                canvas.top = canvas.oldTop;
+            }
+
+            canvas.width = min(max(canvas.width, canvas.minWidth), canvas.maxWidth);
+            canvas.height = min(max(canvas.height, canvas.minHeight), canvas.maxHeight);
+
+            this.limitCanvas(false, true);
+
+            canvas.oldLeft = canvas.left = min(max(canvas.left, canvas.minLeft), canvas.maxLeft);
+            canvas.oldTop = canvas.top = min(max(canvas.top, canvas.minTop), canvas.maxTop);
+
+            this.$canvas.css({
+                width: canvas.width,
+                height: canvas.height,
+                left: canvas.left,
+                top: canvas.top
+            });
+
+
+            this.renderImage();
+
+            /*
+             if (this.isCropped && this.isLimited) {
+             this.limitCropBox(true, true);
+             }
+             
+             if (isChanged) {
+             this.output();
+             }
+             */
+        },
+
+        renderImage: function (isChanged) {
+            var canvas = this.canvas;
+            var image = this.image;
+
+            $.extend(image, {
+                width: canvas.width,
+                height: canvas.height,
+                left: 0,
+                top: 0
+            });
+
+            this.$clone.css({
+                width: image.width,
+                height: image.height,
+                marginLeft: image.left,
+                marginTop: image.top
+            });
+
+            if (isChanged) {
+                this.output();
+            }
         },
 
         unbuild: function () {
@@ -396,12 +622,13 @@
 
         // Képarány
         aspectRatio: NaN,
-        
-        
+
         // Konténer méretezése
         minContainerWidth: 200,
         minContainerHeight: 100,
 
+        // nézet módja
+        viewMode: 0, // 0, 1, 2, 3
 
     };
 

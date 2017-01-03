@@ -1,0 +1,45 @@
+.heimgeditor-hidden {
+  display: none !important;
+}
+
+
+.heimgeditor-container {
+  font-size: 0;
+  line-height: 0;
+
+  position: relative;
+
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+
+  direction: ltr !important;
+}
+
+.heimgeditor-container img {
+  display: block;
+
+  width: 100%;
+  min-width: 0 !important;
+  max-width: none !important;
+  height: 100%;
+  min-height: 0 !important;
+  max-height: none !important;
+
+  image-orientation: 0deg !important;
+}
+
+
+.heimgeditor-wrap-box,
+.heimgeditor-canvas {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.heimgeditor-wrap-box {
+  overflow: hidden;
+}

@@ -55,14 +55,23 @@
     var EVENT_RESIZE = 'resize.' + NAMESPACE; // Bind to window with namespace
     var EVENT_BUILD = 'build.' + NAMESPACE;
     var EVENT_BUILT = 'built.' + NAMESPACE;
-    var EVENT_CROP_START = 'cropstart.' + NAMESPACE;
-    var EVENT_CROP_MOVE = 'cropmove.' + NAMESPACE;
-    var EVENT_CROP_END = 'cropend.' + NAMESPACE;
-    var EVENT_CROP = 'crop.' + NAMESPACE;
     var EVENT_ZOOM = 'zoom.' + NAMESPACE;
 
     // Classes
     var CLASS_BG = 'he-img-bg';
+    var CLASS_HIDDEN = 'heimg-hidden';
+
+
+    // Maths
+    var num = Number;
+    var min = Math.min;
+    var max = Math.max;
+    var abs = Math.abs;
+    var sin = Math.sin;
+    var cos = Math.cos;
+    var sqrt = Math.sqrt;
+    var round = Math.round;
+    var floor = Math.floor;
 
 
     function isNumber(n) {
@@ -153,7 +162,7 @@
             var url;
 
             if ($this.is('img')) {
-                
+
                 // Should use `$.fn.attr` here. e.g.: "img/picture.jpg"
                 this.originalUrl = url = $this.attr('src');
 
@@ -276,7 +285,102 @@
                 });
 
                 this.isLoaded = true;
+                this.build();
             }, this));
+        },
+
+        build: function () {
+            var options = this.options;
+            var $this = this.$element;
+            var $clone = this.$clone;
+            var $heImgEditor;
+
+            if (!this.isLoaded) {
+                return;
+            }
+
+            // Unbuild first when replace
+            if (this.isBuilt) {
+                this.unbuild();
+            }
+
+            // Elemek létrehozása
+            this.$container = $this.parent();
+            this.$heImgEditor = $heImgEditor = $(HeImgEditor.TEMPLATE);
+            this.$canvas = $heImgEditor.find('.heimgeditor-canvas').append($clone);
+
+            // Eredeti kép elrejtése
+            $this.addClass(CLASS_HIDDEN).after($heImgEditor);
+
+            this.bind();
+
+            options.aspectRatio = max(0, options.aspectRatio) || NaN;
+
+            if (options.background) {
+                $heImgEditor.addClass(CLASS_BG);
+            }
+
+            this.render();
+            this.isBuilt = true;
+
+            // Trigger the built event asynchronously to keep `data('cropper')` is defined
+            this.completing = setTimeout($.proxy(function () {
+                this.trigger(EVENT_BUILT);
+                this.isCompleted = true;
+            }, this), 0);
+        },
+
+        bind: function () {
+            var options = this.options;
+            var $this = this.$element;
+            var $heImgEditor = this.$heImgEditor;
+
+            if (options.responsive) {
+                $window.on(EVENT_RESIZE, (this._resize = proxy(this.resize, this)));
+            }
+        },
+
+        render: function () {
+            this.initContainer();
+            this.initCanvas();
+        },
+
+        initContainer: function () {
+            var options = this.options;
+            var $this = this.$element;
+            var $container = this.$container;
+            var $heImgEditor = this.$heImgEditor;
+
+            $heImgEditor.addClass(CLASS_HIDDEN);
+            $this.removeClass(CLASS_HIDDEN);
+ 
+            $heImgEditor.css((this.container = {
+                width: max($container.width(), num(options.minContainerWidth) || 200),
+                height: max($container.height(), num(options.minContainerHeight) || 100)
+            }));
+
+            $this.addClass(CLASS_HIDDEN);
+            $heImgEditor.removeClass(CLASS_HIDDEN);
+        },
+
+        initCanvas: function () { 
+            
+        },
+
+        unbuild: function () {
+            if (!this.isBuilt) {
+                return;
+            }
+
+            if (!this.isCompleted) {
+                clearTimeout(this.completing);
+            }
+
+            this.isBuilt = false;
+            this.isCompleted = false;
+            this.initialImage = null;
+
+            // Clear `cropBox` is necessary when replace
         },
 
         stop: function () {
@@ -287,12 +391,31 @@
 
 
     HeImgEditor.DEFAULTS = {
+        // Háttér megjelenítése
+        background: true,
+
+        // Képarány
+        aspectRatio: NaN,
+        
+        
+        // Konténer méretezése
+        minContainerWidth: 200,
+        minContainerHeight: 100,
+
 
     };
 
     HeImgEditor.setDefaults = function (options) {
         $.extend(HeImgEditor.DEFAULTS, options);
     };
+
+    HeImgEditor.TEMPLATE = (
+            '<div class="heimgeditor-container">' +
+            '<div class="heimgeditor-wrap-box">' +
+            '<div class="heimgeditor-canvas"></div>' +
+            '</div>' +
+            '</div>'
+            );
 
 
     // Save the other cropper

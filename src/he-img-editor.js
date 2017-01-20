@@ -98,7 +98,7 @@
     var ACTION_CROP = 'crop';
     var ACTION_MOVE = 'move';
     var ACTION_NONE = 'none';
-
+    
     function isNumber(n) {
         return typeof n === 'number' && !isNaN(n);
     }
@@ -177,6 +177,9 @@
         this.canvas = null;
         this.cropBox = null;
         this.activeFunction = false;
+        this.activatedFilters = {
+            blur : 0,
+        };
         
         this.init();
     }
@@ -339,6 +342,8 @@
             this.$heImgEditor = $heImgEditor = $(HeImgEditor.TEMPLATE);
             this.$editorControls = this.$heImgEditor.find('.heimgeditor-controls');
             this.$canvas = $heImgEditor.find('.heimgeditor-canvas').append($clone);
+            this.$image = this.$canvas.find('img');
+            this.$sliderBox = $heImgEditor.find('.heimgeditor-slider-box');
             this.$dragBox = $heImgEditor.find('.heimgeditor-drag-box');
             this.$cropBox = $cropBox = $heImgEditor.find('.heimgeditor-crop-box');
             this.$face = $face = $cropBox.find('.heimgeditor-face');
@@ -389,8 +394,81 @@
             
             this.$button.blur.on(EVENT_MOUSE_DOWN, function(e){
                 if(_this.functionIsActivate(e)) return false;
+                
+                var val = _this.activatedFilters.blur;
+                
+                var options = {
+                    min: 0,
+                    max: 10,
+                    value : val
+                };
+                
+                var changeFunc = function(_this, event, ui){
+                    _this.filter.blur(_this, ui.value );
+                };
+                
+                //_this.generate.slider(options).appendTo(_this.$sliderBox);// FIXME:EZ LENNE A JÓ, de nem működik, nem látszik az elem
+                _this.generate.slider(_this, options, changeFunc).appendTo($('body'));
+                _this.generate.saveBtn(_this).appendTo($('body'));
             });
             
+        },
+        
+        
+        generate : {
+            
+            slider: function(_this, options, changeFunc){
+                var html = '<div id="slider" class="he-slider">'+
+                                '<div class="custom-handle" class="ui-slider-handle"></div>'+
+                           '</div>';
+                   
+                var slider = $(html);
+                
+                var handle = slider.find( ".custom-handle" );
+                
+                
+                $.extend( options, {
+                    create: function() {
+                        handle.text( $( this ).slider( "value" ) );
+                    },
+                    slide: function( event, ui ) {
+                        handle.text( ui.value );
+                        changeFunc(_this, event, ui);
+                    }
+                } );
+                
+                slider.slider(options);
+                
+                return slider;
+            },
+            
+            saveBtn: function(_this){
+                var html = '<button class="save-btn">'+
+                                'Változtatások mentése'+
+                           '</div>';
+                var btn = $(html);
+                
+                btn.click(function(e){
+                    $(this).remove();
+                    _this.functionIsInActivate(e);
+                });
+                
+                return btn;   
+            },
+                    
+        },
+        
+        filter: {
+            blur : function(_this, val){
+                var image = _this.$image;
+               
+                val = 'blur('+val+'px)';
+               
+                image.css({
+                    '-webkit-filter' : val,
+                    'filter' : val,
+                });
+            },
         },
         
         
@@ -415,7 +493,7 @@
          */
         functionIsInActivate: function(e){
             if(this.activeFunction === false) return true;
-            var $target = $(e.currentTarget);
+            var $target = this.$button[this.activeFunction];
             this.activeFunction = false;
             $target.removeClass(CLASS_ACTIVE_FUNCTION);
             this.$editorControls.removeClass(CLASS_ACTIVE_FUNCTION_EDITOR);
@@ -1432,6 +1510,7 @@
             '<div class="heimgeditor-container">' +
             '<div class="heimgeditor-wrap-box">' +
             '<div class="heimgeditor-canvas"></div>' +
+            '<div class="heimgeditor-slider-box"></div>' +
             '</div>' +
             '<div class="heimgeditor-controls">' +
             '<div class="heimgeditor-c-crop heimgeditor-btn"><i class="fa fa-cut"></i></div>' +
@@ -1571,7 +1650,7 @@
     // JS
     for(var c in COMPONENTS.js){
         for(var ck in COMPONENTS.js[c]){
-            var url = JSFileParentPath+'/components/'+c+'/'+COMPONENTS.js[c][ck];
+            var url = JSFileParentPath+'components/'+c+'/'+COMPONENTS.js[c][ck];
             $.ajax({
                 url: url,
                 dataType: "script",
@@ -1583,7 +1662,7 @@
     // CSS
     for(var c in COMPONENTS.css){
         for(var ck in COMPONENTS.css[c]){
-            var url = JSFileParentPath+'/components/'+c+'/'+COMPONENTS.css[c][ck];
+            var url = JSFileParentPath+'components/'+c+'/'+COMPONENTS.css[c][ck];
             $('head').append( $('<link rel="stylesheet" type="text/css" />').attr('href', url) );
         }
     }

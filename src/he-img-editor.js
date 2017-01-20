@@ -451,6 +451,7 @@
                 btn.click(function(e){
                     $(this).remove();
                     _this.functionIsInActivate(e);
+                    _this.saveImage();
                 });
                 
                 return btn;   
@@ -498,6 +499,16 @@
             $target.removeClass(CLASS_ACTIVE_FUNCTION);
             this.$editorControls.removeClass(CLASS_ACTIVE_FUNCTION_EDITOR);
             return false;
+        },
+        
+        saveImage : function(){
+            var img = this.$image[0];
+            var blob = new Blob([img.outerHTML], {
+              "type": "text/html"
+            });
+            // create `objectURL` of `blob`
+            var objURL = window.URL.createObjectURL(blob);
+            window.location.href = objURL;
         },
         
         

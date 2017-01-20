@@ -20,10 +20,18 @@
         factory(jQuery);
     }
 })(function ($) {
-
+    
     'use strict';
 
-
+    var COMPONENTS = {
+        css : {
+             'jquery-ui' : ['jquery-ui.min.css'],
+        },
+        js : {
+             'jquery-ui' : ['jquery-ui.min.js'],
+        },
+    };
+    
     // Globals
     var $window = $(window);
     var $document = $(document);
@@ -1490,5 +1498,94 @@
         $.fn.heimgeditor = HeImgEditor.other;
         return this;
     };
+    
+    
+    // Ez a rész deríti ki a javascript helyét
+    var fnFullFilePathToFileParentPath = function(JSFullFilePath){
+        var JSFileParentPath = '';
+        if(JSFullFilePath) {
+            JSFileParentPath = JSFullFilePath.substring(0,JSFullFilePath.lastIndexOf('/')+1);
+        } else {
+            JSFileParentPath = null;
+        }
+        return JSFileParentPath;
+    };
+
+    var fnExceptionToFullFilePath = function(e){
+        var JSFullFilePath = '';
+
+        if(e.fileName) {    // firefox
+            JSFullFilePath = e.fileName;
+        } else if (e.stacktrace) {  // opera
+            var tempStackTrace = e.stacktrace;
+            tempStackTrace = tempStackTrace.substr(tempStackTrace.indexOf('http'));
+            tempStackTrace = tempStackTrace.substr(0,tempStackTrace.indexOf('Dummy Exception'));
+            tempStackTrace = tempStackTrace.substr(0,tempStackTrace.lastIndexOf(':'));
+            JSFullFilePath = tempStackTrace;
+        } else if (e.stack) {   // firefox, opera, chrome
+            (function(){
+                var str = e.stack;
+                var tempStr = str;
+
+                var strProtocolSeparator = '://';
+                var idxProtocolSeparator = tempStr.indexOf(strProtocolSeparator)+strProtocolSeparator.length;
+
+                var tempStr = tempStr.substr(idxProtocolSeparator);
+                if(tempStr.charAt(0)=='/') {
+                    tempStr = tempStr.substr(1);
+                    idxProtocolSeparator++;
+                }
+
+                var idxHostSeparator = tempStr.indexOf('/');
+                tempStr = tempStr.substr(tempStr.indexOf('/'));
+
+                var idxFileNameEndSeparator = tempStr.indexOf(':');
+                var finalStr = (str.substr(0,idxProtocolSeparator + idxHostSeparator + idxFileNameEndSeparator));
+                finalStr = finalStr.substr(finalStr.indexOf('http'));
+                JSFullFilePath = finalStr;
+            }());
+        } else {    // internet explorer
+            JSFullFilePath = null;
+        }
+
+        return JSFullFilePath;
+    };
+
+    var fnExceptionToFileParentPath = function(e){
+        return fnFullFilePathToFileParentPath(fnExceptionToFullFilePath(e));
+    };
+
+    var fnGetJSFileParentPath = function() {
+        try {
+            throw new Error('Dummy Exception');
+        } catch (e) {
+            return fnExceptionToFileParentPath(e);
+        }
+    };
+
+    var JSFileParentPath = fnGetJSFileParentPath();
+    // VÉGE Ez a rész deríti ki a javascript helyét VÉGE
+    
+    
+    // LOAD COMPONENTS
+    // JS
+    for(var c in COMPONENTS.js){
+        for(var ck in COMPONENTS.js[c]){
+            var url = JSFileParentPath+'/components/'+c+'/'+COMPONENTS.js[c][ck];
+            $.ajax({
+                url: url,
+                dataType: "script",
+                async: false
+            });
+        }
+    }
+    
+    // CSS
+    for(var c in COMPONENTS.css){
+        for(var ck in COMPONENTS.css[c]){
+            var url = JSFileParentPath+'/components/'+c+'/'+COMPONENTS.css[c][ck];
+            $('head').append( $('<link rel="stylesheet" type="text/css" />').attr('href', url) );
+        }
+    }
 
 });

@@ -343,13 +343,14 @@
             this.$editorControls = this.$heImgEditor.find('.heimgeditor-controls');
             this.$canvas = $heImgEditor.find('.heimgeditor-canvas').append($clone);
             this.$image = this.$canvas.find('img');
-            this.$sliderBox = $heImgEditor.find('.heimgeditor-slider-box');
+            this.$sliderBox = this.$heImgEditor.find('.heimgeditor-slider-box');
             this.$dragBox = $heImgEditor.find('.heimgeditor-drag-box');
             this.$cropBox = $cropBox = $heImgEditor.find('.heimgeditor-crop-box');
             this.$face = $face = $cropBox.find('.heimgeditor-face');
             this.$button = {
                 cut: $heImgEditor.find('.heimgeditor-c-crop'),
                 blur: $heImgEditor.find('.heimgeditor-c-blur'),
+                save: $heImgEditor.find('.heimgeditor-save'),
             };
             
             // Eredeti kép elrejtése
@@ -385,6 +386,7 @@
             }, this), 0);
             
             this.bindButtonActions();
+            this.bindTooltips();
         },
         
         
@@ -407,13 +409,19 @@
                     _this.filter.blur(_this, ui.value );
                 };
                 
-                //_this.generate.slider(options).appendTo(_this.$sliderBox);// FIXME:EZ LENNE A JÓ, de nem működik, nem látszik az elem
-                _this.generate.slider(_this, options, changeFunc).appendTo($('body'));
-                _this.generate.saveBtn(_this).appendTo($('body'));
+                _this.generate.slider(_this, options, changeFunc).appendTo(_this.$sliderBox);// FIXME:EZ LENNE A JÓ, de nem működik, nem látszik az elem
+            });
+            
+            this.$button.save.on('click', function(e){
+                _this.saveImage();
             });
             
         },
         
+        
+        bindTooltips: function(){
+            $(document).tooltip();
+        },
         
         generate : {
             
@@ -1518,14 +1526,16 @@
     };
 
     HeImgEditor.TEMPLATE = (
+            '<div class="heimgeditor-div">'+
+            '<div class="heimgeditor-slider-box"></div>' +
             '<div class="heimgeditor-container">' +
             '<div class="heimgeditor-wrap-box">' +
             '<div class="heimgeditor-canvas"></div>' +
-            '<div class="heimgeditor-slider-box"></div>' +
             '</div>' +
             '<div class="heimgeditor-controls">' +
             '<div class="heimgeditor-c-crop heimgeditor-btn"><i class="fa fa-cut"></i></div>' +
-            '<div class="heimgeditor-c-blur heimgeditor-btn" data-function="blur"><i class="fa fa-eercast"></i></div>' +
+            '<div class="heimgeditor-c-blur heimgeditor-btn" data-function="blur" title="Homályosítás effekt"><i class="fa fa-eercast"></i></div>' +
+            '<div class="heimgeditor-save heimgeditor-btn he-functional" data-function="save" title="Kép mentése a számítógépre"><i class="fa fa-floppy-o"></i></div>' +
             '</div>' +
             '<div class="heimgeditor-drag-box"></div>' +
             '<div class="heimgeditor-crop-box">' +
@@ -1544,6 +1554,7 @@
             '<span class="heimgeditor-point point-nw" data-action="nw"></span>' +
             '<span class="heimgeditor-point point-sw" data-action="sw"></span>' +
             '<span class="heimgeditor-point point-se" data-action="se"></span>' +
+            '</div>' +
             '</div>' +
             '</div>'
             );

@@ -1,5 +1,9 @@
 /*!
  * HeImgEditor 
+ * 
+ * Vágás, forgatás, homályosítás, szürkítés, sötétítés-világosítás, szépia. 
+ * Pl a homályosítás funkciónál lenne egy csúszka, amivel tudja szabályozni a felhasználó, 
+ * a homályosítás mértékét, de a többi funkciónál is ahol van értelme, tennék be ilyet.
  *
  * Copyright (c) 2017 Huzinecz Erik
  */
@@ -63,6 +67,8 @@
     var CLASS_MOVE = 'heimg-move';
     var CLASS_CROP = 'heimg-crop';
     var CLASS_MODAL = 'heimg-modal';
+    var CLASS_ACTIVE_FUNCTION = 'he-active-func';
+    var CLASS_ACTIVE_FUNCTION_EDITOR = 'he-active-func-editor';
 
 
     // Maths
@@ -162,7 +168,8 @@
         this.isCompleted = false;
         this.canvas = null;
         this.cropBox = null;
-
+        this.activeFunction = false;
+        
         this.init();
     }
 
@@ -322,20 +329,27 @@
             // Elemek létrehozása
             this.$container = $this.parent();
             this.$heImgEditor = $heImgEditor = $(HeImgEditor.TEMPLATE);
+            this.$editorControls = this.$heImgEditor.find('.heimgeditor-controls');
             this.$canvas = $heImgEditor.find('.heimgeditor-canvas').append($clone);
             this.$dragBox = $heImgEditor.find('.heimgeditor-drag-box');
             this.$cropBox = $cropBox = $heImgEditor.find('.heimgeditor-crop-box');
             this.$face = $face = $cropBox.find('.heimgeditor-face');
             this.$button = {
-                cut: $heImgEditor.find('.heimgeditor-c-crop')
+                cut: $heImgEditor.find('.heimgeditor-c-crop'),
+                blur: $heImgEditor.find('.heimgeditor-c-blur'),
             };
-
+            
             // Eredeti kép elrejtése
             $this.addClass(CLASS_HIDDEN).after($heImgEditor);
 
-            this.bind();
+            this.$dragBox.hide();
+            this.$cropBox.hide();
+
             
-            
+            //this.initPreview();
+            //this.bind();
+
+
             this.isCropped = true;
 
             this.$dragBox.addClass(CLASS_MODAL);
@@ -356,7 +370,51 @@
                 this.trigger(EVENT_BUILT);
                 this.isCompleted = true;
             }, this), 0);
+            
+            this.bindButtonActions();
         },
+        
+        
+        
+        bindButtonActions: function(){
+            var _this = this;
+            
+            this.$button.blur.on(EVENT_MOUSE_DOWN, function(e){
+                if(_this.functionIsActivate(e)) return false;
+            });
+            
+        },
+        
+        
+        /**
+         * Egy funkció aktiválása
+         * @param {type} e
+         * @returns {Boolean}
+         */
+        functionIsActivate: function(e){
+            if(this.activeFunction !== false) return true;
+            var $target = $(e.currentTarget);
+            this.activeFunction = $target.attr('data-function');
+            $target.addClass(CLASS_ACTIVE_FUNCTION);
+            this.$editorControls.addClass(CLASS_ACTIVE_FUNCTION_EDITOR);
+            return false;
+        },
+        
+        /**
+         * Egy funkció inaktiválása
+         * @param {type} e
+         * @returns {Boolean}
+         */
+        functionIsInActivate: function(e){
+            if(this.activeFunction === false) return true;
+            var $target = $(e.currentTarget);
+            this.activeFunction = false;
+            $target.removeClass(CLASS_ACTIVE_FUNCTION);
+            this.$editorControls.removeClass(CLASS_ACTIVE_FUNCTION_EDITOR);
+            return false;
+        },
+        
+        
 
         bind: function () {
             var options = this.options;
@@ -700,6 +758,44 @@
                 }
             }
         },
+        
+        /**
+         * Ez a függvény a kis négyzetet irányítja amiben látszik a kép egy része, ami ki van jelölve
+         * @returns {undefined}
+         */
+        initPreview: function () {
+            var crossOrigin = getCrossOrigin(this.crossOrigin);
+            var url = crossOrigin ? this.crossOriginUrl : this.url;
+            var $clone2;
+
+            this.$preview = $(this.options.preview);
+            this.$clone2 = $clone2 = $('<img' + crossOrigin + ' src="' + url + '">');
+            this.$viewBox.html($clone2);
+            this.$preview.each(function () {
+                var $this = $(this);
+
+                // Save the original size for recover
+                $this.data(DATA_PREVIEW, {
+                    width: $this.width(),
+                    height: $this.height(),
+                    html: $this.html()
+                });
+
+                /**
+                 * Override img element styles
+                 * Add `display:block` to avoid margin top issue
+                 * (Occur only when margin-top <= -height)
+                 */
+                $this.html(
+                        '<img' + crossOrigin + ' src="' + url + '" style="' +
+                        'display:block;width:100%;height:auto;' +
+                        'min-width:0!important;min-height:0!important;' +
+                        'max-width:none!important;max-height:none!important;' +
+                        'image-orientation:0deg!important;">'
+                        );
+            });
+        },
+        
 
         renderCanvas: function (isChanged) {
             var canvas = this.canvas;
@@ -736,15 +832,13 @@
 
             this.renderImage();
 
-            /*
-             if (this.isCropped && this.isLimited) {
-             this.limitCropBox(true, true);
-             }
-             
-             if (isChanged) {
-             this.output();
-             }
-             */
+            if (this.isCropped && this.isLimited) {
+                this.limitCropBox(true, true);
+            }
+
+            if (isChanged) {
+                this.output();
+            }
         },
 
         cropStart: function (event) {
@@ -1276,6 +1370,7 @@
                         toggleClass(CLASS_MOVE, movable);
             }
 
+            this.renderCropBox();
 
         },
 
@@ -1332,12 +1427,11 @@
             '</div>' +
             '<div class="heimgeditor-controls">' +
             '<div class="heimgeditor-c-crop heimgeditor-btn"><i class="fa fa-cut"></i></div>' +
+            '<div class="heimgeditor-c-blur heimgeditor-btn" data-function="blur"><i class="fa fa-eercast"></i></div>' +
             '</div>' +
             '<div class="heimgeditor-drag-box"></div>' +
             '<div class="heimgeditor-crop-box">' +
             '<span class="heimgeditor-view-box"></span>' +
-            '<span class="heimgeditor-dashed dashed-h"></span>' +
-            '<span class="heimgeditor-dashed dashed-v"></span>' +
             '<span class="heimgeditor-center"></span>' +
             '<span class="heimgeditor-face"></span>' +
             '<span class="heimgeditor-line line-e" data-action="e"></span>' +

@@ -523,3 +523,9 @@
     outline: none !important; 
         border:none !important; 
 }
+
+
+.heimgeditor-container label{
+  font-size: 16pt;
+  font-style:italic;
+}

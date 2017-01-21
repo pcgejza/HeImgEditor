@@ -390,15 +390,14 @@
 }
 
 .heimgeditor-slider-box{
-    background-color: transparent;
-    height: 40px;
-    width: 34%;
-    bottom: 0px;
+    background-color: rgba(65,105, 225, 0.7);
+    height: 30px;
+    width: 47%;
     z-index: 8000;
-    position: absolute;
-    bottom: -74px;
-    left: 0px;
-    margin-left: 33%;
+    position: relative;
+    top: 90%;
+    margin-left: 25%;
+    padding: 15px;
 }
 
 .he-slider .custom-handle{
@@ -415,3 +414,25 @@
   position: absolute;
   bottom:30px;
 }
+
+.heimgeditor-slider-box .he-slider{
+    height: 40%;
+    width: 100%;
+    margin-top: 5px;
+}
+
+.heimgeditor-slider-box .he-slider span.ui-slider-handle{
+    height: 100%;
+    width: 30px;
+}
+
+.hide{
+    display:none;
+}
+
+.heimgeditor-slider-box .save-btn{
+    padding: 6px;
+    position: absolute;
+    right: 0px;
+    top: 0px;
+}   

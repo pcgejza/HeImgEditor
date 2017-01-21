@@ -398,6 +398,8 @@
                 if(_this.functionIsActivate(e)) return false;
                 
                 var val = _this.activatedFilters.blur;
+                var text = "Homályosítás mértéke";
+                
                 
                 var options = {
                     min: 0,
@@ -406,10 +408,13 @@
                 };
                 
                 var changeFunc = function(_this, event, ui){
+                    _this.activatedFilters.blur = ui.value;
                     _this.filter.blur(_this, ui.value );
                 };
                 
-                _this.generate.slider(_this, options, changeFunc).appendTo(_this.$sliderBox);// FIXME:EZ LENNE A JÓ, de nem működik, nem látszik az elem
+                _this.generate.slider(_this, options, changeFunc, text).appendTo(_this.$sliderBox);
+                _this.generate.saveBtn(_this).appendTo(_this.$sliderBox);
+                _this.$sliderBox.removeClass('hide');
             });
             
             this.$button.save.on('click', function(e){
@@ -425,7 +430,7 @@
         
         generate : {
             
-            slider: function(_this, options, changeFunc){
+            slider: function(_this, options, changeFunc, text){
                 var html = '<div id="slider" class="he-slider">'+
                                 '<div class="custom-handle" class="ui-slider-handle"></div>'+
                            '</div>';
@@ -447,19 +452,23 @@
                 
                 slider.slider(options);
                 
-                return slider;
+                var div = $('<div/>');
+                
+                $('<label/>').html(text).appendTo(div);
+                slider.appendTo(div);
+                
+                return div;
             },
             
             saveBtn: function(_this){
                 var html = '<button class="save-btn">'+
-                                'Változtatások mentése'+
+                                '<i class="fa fa-floppy-o"></i>'+
                            '</div>';
                 var btn = $(html);
                 
                 btn.click(function(e){
-                    $(this).remove();
                     _this.functionIsInActivate(e);
-                    _this.saveImage();
+                    _this.$sliderBox.addClass('hide').html('');
                 });
                 
                 return btn;   
@@ -1526,37 +1535,37 @@
     };
 
     HeImgEditor.TEMPLATE = (
-            '<div class="heimgeditor-div">'+
-            '<div class="heimgeditor-slider-box"></div>' +
             '<div class="heimgeditor-container">' +
-            '<div class="heimgeditor-wrap-box">' +
-            '<div class="heimgeditor-canvas"></div>' +
-            '</div>' +
-            '<div class="heimgeditor-controls">' +
-            '<div class="heimgeditor-c-crop heimgeditor-btn"><i class="fa fa-cut"></i></div>' +
-            '<div class="heimgeditor-c-blur heimgeditor-btn" data-function="blur" title="Homályosítás effekt"><i class="fa fa-eercast"></i></div>' +
-            '<div class="heimgeditor-save heimgeditor-btn he-functional" data-function="save" title="Kép mentése a számítógépre"><i class="fa fa-floppy-o"></i></div>' +
-            '</div>' +
-            '<div class="heimgeditor-drag-box"></div>' +
-            '<div class="heimgeditor-crop-box">' +
-            '<span class="heimgeditor-view-box"></span>' +
-            '<span class="heimgeditor-center"></span>' +
-            '<span class="heimgeditor-face"></span>' +
-            '<span class="heimgeditor-line line-e" data-action="e"></span>' +
-            '<span class="heimgeditor-line line-n" data-action="n"></span>' +
-            '<span class="heimgeditor-line line-w" data-action="w"></span>' +
-            '<span class="heimgeditor-line line-s" data-action="s"></span>' +
-            '<span class="heimgeditor-point point-e" data-action="e"></span>' +
-            '<span class="heimgeditor-point point-n" data-action="n"></span>' +
-            '<span class="heimgeditor-point point-w" data-action="w"></span>' +
-            '<span class="heimgeditor-point point-s" data-action="s"></span>' +
-            '<span class="heimgeditor-point point-ne" data-action="ne"></span>' +
-            '<span class="heimgeditor-point point-nw" data-action="nw"></span>' +
-            '<span class="heimgeditor-point point-sw" data-action="sw"></span>' +
-            '<span class="heimgeditor-point point-se" data-action="se"></span>' +
-            '</div>' +
-            '</div>' +
-            '</div>'
+                '<div class="heimgeditor-wrap-box">' +
+                    '<div class="heimgeditor-canvas"></div>' +
+                '</div>' +
+                '<div class="heimgeditor-controls">' +
+                    '<div class="heimgeditor-c-crop heimgeditor-btn"><i class="fa fa-cut"></i></div>' +
+                    '<div class="heimgeditor-c-blur heimgeditor-btn" data-function="blur" title="Homályosítás effekt"><i class="fa fa-eercast"></i></div>' +
+                    '<div class="heimgeditor-save heimgeditor-btn he-functional" data-function="save" title="Kép mentése a számítógépre"><i class="fa fa-floppy-o"></i></div>' +
+                '</div>' +
+                /*
+                '<div class="heimgeditor-drag-box"></div>' +
+                '<div class="heimgeditor-crop-box">' +
+                    '<span class="heimgeditor-view-box"></span>' +
+                    '<span class="heimgeditor-center"></span>' +
+                    '<span class="heimgeditor-face"></span>' +
+                    '<span class="heimgeditor-line line-e" data-action="e"></span>' +
+                    '<span class="heimgeditor-line line-n" data-action="n"></span>' +
+                    '<span class="heimgeditor-line line-w" data-action="w"></span>' +
+                    '<span class="heimgeditor-line line-s" data-action="s"></span>' +
+                    '<span class="heimgeditor-point point-e" data-action="e"></span>' +
+                    '<span class="heimgeditor-point point-n" data-action="n"></span>' +
+                    '<span class="heimgeditor-point point-w" data-action="w"></span>' +
+                    '<span class="heimgeditor-point point-s" data-action="s"></span>' +
+                    '<span class="heimgeditor-point point-ne" data-action="ne"></span>' +
+                    '<span class="heimgeditor-point point-nw" data-action="nw"></span>' +
+                    '<span class="heimgeditor-point point-sw" data-action="sw"></span>' +
+                    '<span class="heimgeditor-point point-se" data-action="se"></span>' +
+                '</div>' +
+                */
+                '<div class="heimgeditor-slider-box hide"></div>' +
+            '</div>' 
             );
 
 

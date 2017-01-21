@@ -551,12 +551,26 @@
                 var currentWidth = _this.$image.width();
                 var currentHeight = _this.$image.height();
 
-                image.css({
+
+                var changeElement = _this.imageData.width > _this.imageData.height ? 'width' : 'height';
+                
+                var stEl = 0;
+                
+                if(_this.imageData.width > _this.imageData.height){
+                    stEl = currentHeight != _this.imageData.height ?  _this.imageData.width : currentHeight;
+                }else{
+                    stEl = currentWidth != _this.imageData.width ?  _this.imageData.height : currentWidth;
+                }
+                
+                var setcss = {
                     '-ms-transform': val, /* IE 9 */
                     '-webkit-transform': val, /* Chrome, Safari, Opera */
                     'transform': val,
-                    'width' : currentHeight != _this.imageData.height ?  _this.imageData.width : currentHeight
-                });
+                };
+                
+                setcss[changeElement] = stEl;
+
+                image.css(setcss);
             },
             applyFilters: function (_this) {
                 var image = _this.$image;

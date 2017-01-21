@@ -180,6 +180,7 @@
         this.activatedFilters = {
             blur : 0,
             grayscale : 0,
+            brightness : 100
         };
         
         this.init();
@@ -352,6 +353,7 @@
                 cut: $heImgEditor.find('.heimgeditor-c-crop'),
                 blur: $heImgEditor.find('.heimgeditor-c-blur'),
                 grayscale: $heImgEditor.find('.heimgeditor-c-grayscale'),
+                brightness: $heImgEditor.find('.heimgeditor-c-brightness'),
                 save: $heImgEditor.find('.heimgeditor-save'),
             };
             
@@ -441,6 +443,28 @@
                 _this.$sliderBox.removeClass('hide');
             });
             
+            this.$button.brightness.on(EVENT_MOUSE_DOWN, function(e){
+                if(_this.functionIsActivate(e)) return false;
+                
+                var val = _this.activatedFilters.brightness;
+                var text = "Sötétítés-világosítás mértéke";
+                
+                var options = {
+                    min: 0,
+                    max: 200,
+                    value : val
+                };
+                
+                var changeFunc = function(_this, event, ui){
+                    _this.activatedFilters.brightness = ui.value;
+                    _this.filter.brightness(_this, ui.value );
+                };
+                
+                _this.generate.slider(_this, options, changeFunc, text).appendTo(_this.$sliderBox);
+                _this.generate.saveBtn(_this).appendTo(_this.$sliderBox);
+                _this.$sliderBox.removeClass('hide');
+            });
+            
             this.$button.save.on('click', function(e){
                 _this.saveImage();
             });
@@ -515,6 +539,16 @@
                 var image = _this.$image;
                
                 val = 'grayscale('+val+'%)';
+               
+                image.css({
+                    '-webkit-filter' : val,
+                    'filter' : val,
+                });
+            },
+            brightness : function(_this, val){
+                var image = _this.$image;
+               
+                val = 'brightness('+val+'%)';
                
                 image.css({
                     '-webkit-filter' : val,
@@ -1577,6 +1611,7 @@
                     '<div class="heimgeditor-c-crop heimgeditor-btn"><i class="fa fa-cut"></i></div>' +
                     '<div class="heimgeditor-c-blur heimgeditor-btn" data-function="blur" title="Homályosítás effekt"><i class="fa fa-eercast"></i></div>' +
                     '<div class="heimgeditor-c-grayscale heimgeditor-btn" data-function="grayscale" title="Szürkítés effekt"><i class="fa fa-adjust"></i></div>' +
+                    '<div class="heimgeditor-c-brightness heimgeditor-btn" data-function="brightness" title="Sötétítés-világosítás effekt"><i class="fa fa-adjust"></i></div>' +
                     '<div class="heimgeditor-save heimgeditor-btn he-functional" data-function="save" title="Kép mentése a számítógépre"><i class="fa fa-floppy-o"></i></div>' +
                 '</div>' +
                 /*

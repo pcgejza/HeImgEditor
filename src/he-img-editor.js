@@ -632,14 +632,24 @@
             var img = this.$image[0];
             var can = document.createElement('canvas');
             var ctx = can.getContext('2d');
-            can.width = img.width;
-            can.height = img.height;
+            
+            var imW = this.image.naturalWidth;
+            var imH = this.image.naturalHeight;
+            
+            can.width = imW;
+            can.height = imH;
 
             ctx.filter = this.activeFilterString;
-            //ctx.rotate(this.activeRotate * Math.PI / 180); // FIXME: Még nem működik a forgatás mentése
+            
+            ctx.clearRect(0,0,imW,imH);
+            ctx.save();
+            ctx.translate(can.width/2,can.height/2);
+            ctx.rotate(this.activeRotate*Math.PI/180);
+            ctx.drawImage(img,-imW/2,-imH/2);
+            ctx.restore();
+            
 
-
-            ctx.drawImage(img, 0, 0, img.width, img.height);
+            $(can).appendTo($('body'));
 
             var objURL = can.toDataURL('image/png');
             window.location.href = objURL;

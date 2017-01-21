@@ -180,7 +180,8 @@
         this.activatedFilters = {
             blur : 0,
             grayscale : 0,
-            brightness : 0
+            brightness : 0,
+            rotate: 0
         };
         
         this.init();
@@ -354,6 +355,7 @@
                 blur: $heImgEditor.find('.heimgeditor-c-blur'),
                 grayscale: $heImgEditor.find('.heimgeditor-c-grayscale'),
                 brightness: $heImgEditor.find('.heimgeditor-c-brightness'),
+                rotate: $heImgEditor.find('.heimgeditor-c-rotate'),
                 save: $heImgEditor.find('.heimgeditor-save'),
             };
             
@@ -465,6 +467,21 @@
                 _this.$sliderBox.removeClass('hide');
             });
             
+            this.$button.rotate.on('click', function(e){
+                var ROTATE_STEP = 20;
+                var val = _this.activatedFilters.rotate;
+                var type = $(this).attr('data-type');
+                
+                if(type == 'left'){
+                    val += ROTATE_STEP;
+                }else if(type == 'right'){
+                    val -= ROTATE_STEP;
+                }
+                
+                _this.activatedFilters.rotate = val;
+                _this.filter.rotate(_this, val);
+            });
+            
             this.$button.save.on('click', function(e){
                 _this.saveImage();
             });
@@ -555,6 +572,17 @@
                 image.css({
                     '-webkit-filter' : val,
                     'filter' : val,
+                });
+            },
+            rotate : function(_this, val){
+                var image = _this.$image;
+                console.log(val);
+                val = 'rotate('+val+'deg)';
+                
+                image.css({
+                    '-ms-transform': val, /* IE 9 */
+                    '-webkit-transform': val, /* Chrome, Safari, Opera */
+                    'transform': val
                 });
             },
         },
@@ -1614,6 +1642,8 @@
                     '<div class="heimgeditor-c-blur heimgeditor-btn" data-function="blur" title="Homályosítás effekt"><i class="fa fa-eercast"></i></div>' +
                     '<div class="heimgeditor-c-grayscale heimgeditor-btn" data-function="grayscale" title="Szürkítés effekt"><i class="fa fa-adjust"></i></div>' +
                     '<div class="heimgeditor-c-brightness heimgeditor-btn" data-function="brightness" title="Sötétítés-világosítás effekt"><i class="fa fa-adjust"></i></div>' +
+                    '<div class="heimgeditor-c-rotate heimgeditor-btn" data-function="rotate" data-type="left" title="Forgatás balra"><i class="fa fa-undo"></i></div>' +
+                    '<div class="heimgeditor-c-rotate heimgeditor-btn" data-function="rotate" data-type="right" title="Forgatás jobbra"><i class="fa fa-repeat"></i></div>' +
                     '<div class="heimgeditor-save heimgeditor-btn he-functional" data-function="save" title="Kép mentése a számítógépre"><i class="fa fa-floppy-o"></i></div>' +
                 '</div>' +
                 /*

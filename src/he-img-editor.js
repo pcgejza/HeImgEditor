@@ -341,7 +341,7 @@
 
             this.isCropped = true;
 
-            options.aspectRatio = max(0, options.aspectRatio) || NaN;
+            //options.aspectRatio = max(0, options.aspectRatio) || NaN;
 
             if (options.background) {
                 $heImgEditor.addClass(CLASS_BG);

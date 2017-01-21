@@ -358,6 +358,7 @@
                 brightness: $heImgEditor.find('.he-btn-c-brightness'),
                 rotate: $heImgEditor.find('.he-btn-c-rotate'),
                 save: $heImgEditor.find('.he-btn-save-img'),
+                addFile: $heImgEditor.find('.he-btn-set-img'),
             };
             
             // Eredeti kép elrejtése
@@ -471,6 +472,10 @@
             
             this.$button.save.on('click', function(e){
                 _this.saveImage();
+            });
+            
+            this.$button.addFile.on('click', function(e){
+                _this.setNewImage();
             });
             
         },
@@ -638,7 +643,36 @@
             window.location.href = objURL;
         },
         
+        setNewImage : function(){
+            var _this = this;
+            var f = $('<input/>').attr('type', 'file');
+            
+            f.attr('accept', '.jpg,.png,.jpeg');
+            
+            f.change(function(){
+                var files = $(this)[0].files;
+                
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    var img = $('<img/>');
+                    img.attr('src', e.target.result);
+                    _this.$heImgEditor.after(img);
+                    _this.destroy();
+                    img.heimgeditor({
+
+                    });
+                }
+
+                reader.readAsDataURL(files[0]);
+            });
+            
+            f.click();
+        },
         
+        destroy: function(){
+            this.$heImgEditor.remove();
+        },
 
         bind: function () {
             var options = this.options;

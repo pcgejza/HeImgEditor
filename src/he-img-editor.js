@@ -179,6 +179,7 @@
         this.activeFunction = false;
         this.activatedFilters = {
             blur : 0,
+            grayscale : 0,
         };
         
         this.init();
@@ -350,6 +351,7 @@
             this.$button = {
                 cut: $heImgEditor.find('.heimgeditor-c-crop'),
                 blur: $heImgEditor.find('.heimgeditor-c-blur'),
+                grayscale: $heImgEditor.find('.heimgeditor-c-grayscale'),
                 save: $heImgEditor.find('.heimgeditor-save'),
             };
             
@@ -410,6 +412,28 @@
                 var changeFunc = function(_this, event, ui){
                     _this.activatedFilters.blur = ui.value;
                     _this.filter.blur(_this, ui.value );
+                };
+                
+                _this.generate.slider(_this, options, changeFunc, text).appendTo(_this.$sliderBox);
+                _this.generate.saveBtn(_this).appendTo(_this.$sliderBox);
+                _this.$sliderBox.removeClass('hide');
+            });
+            
+            this.$button.grayscale.on(EVENT_MOUSE_DOWN, function(e){
+                if(_this.functionIsActivate(e)) return false;
+                
+                var val = _this.activatedFilters.grayscale;
+                var text = "Szürkítés mértéke";
+                
+                var options = {
+                    min: 0,
+                    max: 100,
+                    value : val
+                };
+                
+                var changeFunc = function(_this, event, ui){
+                    _this.activatedFilters.grayscale = ui.value;
+                    _this.filter.grayscale(_this, ui.value );
                 };
                 
                 _this.generate.slider(_this, options, changeFunc, text).appendTo(_this.$sliderBox);
@@ -481,6 +505,16 @@
                 var image = _this.$image;
                
                 val = 'blur('+val+'px)';
+               
+                image.css({
+                    '-webkit-filter' : val,
+                    'filter' : val,
+                });
+            },
+            grayscale : function(_this, val){
+                var image = _this.$image;
+               
+                val = 'grayscale('+val+'%)';
                
                 image.css({
                     '-webkit-filter' : val,
@@ -1542,6 +1576,7 @@
                 '<div class="heimgeditor-controls">' +
                     '<div class="heimgeditor-c-crop heimgeditor-btn"><i class="fa fa-cut"></i></div>' +
                     '<div class="heimgeditor-c-blur heimgeditor-btn" data-function="blur" title="Homályosítás effekt"><i class="fa fa-eercast"></i></div>' +
+                    '<div class="heimgeditor-c-grayscale heimgeditor-btn" data-function="grayscale" title="Szürkítés effekt"><i class="fa fa-adjust"></i></div>' +
                     '<div class="heimgeditor-save heimgeditor-btn he-functional" data-function="save" title="Kép mentése a számítógépre"><i class="fa fa-floppy-o"></i></div>' +
                 '</div>' +
                 /*

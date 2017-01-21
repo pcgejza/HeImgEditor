@@ -180,7 +180,7 @@
         this.activatedFilters = {
             blur : 0,
             grayscale : 0,
-            brightness : 100
+            brightness : 0
         };
         
         this.init();
@@ -429,7 +429,7 @@
                 
                 var options = {
                     min: 0,
-                    max: 100,
+                    max: 10,
                     value : val
                 };
                 
@@ -450,8 +450,8 @@
                 var text = "Sötétítés-világosítás mértéke";
                 
                 var options = {
-                    min: 0,
-                    max: 200,
+                    min: -10,
+                    max: 10,
                     value : val
                 };
                 
@@ -479,21 +479,22 @@
         generate : {
             
             slider: function(_this, options, changeFunc, text){
-                var html = '<div id="slider" class="he-slider">'+
-                                '<div class="custom-handle" class="ui-slider-handle"></div>'+
-                           '</div>';
+                var html = '<div id="slider" class="he-slider"></div>';
                    
                 var slider = $(html);
                 
-                var handle = slider.find( ".custom-handle" );
-                
+                var sliderTooltip = function(event, ui) {
+                    var curValue = ui.value || options.value;
+                    var tooltip = '<div class="tooltip"><div class="tooltip-inner">' + curValue + '</div><div class="tooltip-arrow"></div></div>';
+                    slider.find('.ui-slider-handle').html(tooltip);
+                }
                 
                 $.extend( options, {
-                    create: function() {
-                        handle.text( $( this ).slider( "value" ) );
+                    create: function( event, ui ) {
+                        sliderTooltip(event, ui);
                     },
                     slide: function( event, ui ) {
-                        handle.text( ui.value );
+                        sliderTooltip(event, ui);
                         changeFunc(_this, event, ui);
                     }
                 } );
@@ -537,6 +538,7 @@
             },
             grayscale : function(_this, val){
                 var image = _this.$image;
+                val = val*10;
                
                 val = 'grayscale('+val+'%)';
                
@@ -547,7 +549,7 @@
             },
             brightness : function(_this, val){
                 var image = _this.$image;
-               
+                val = 100 + val*10;
                 val = 'brightness('+val+'%)';
                
                 image.css({

@@ -184,6 +184,8 @@
             rotate: 0
         };
         this.filter.allowFilters = {};
+        this.activeFilterString = "none";
+        this.activeRotate = 0;
         
         this.init();
     }
@@ -462,6 +464,7 @@
                     val -= ROTATE_STEP;
                 }
                 
+                _this.activeRotate = val;
                 _this.activatedFilters.rotate = val;
                 _this.filter.rotate(_this, val);
             });
@@ -569,9 +572,12 @@
                     filt += allowF[k]+" ";
                 }
                 filt = filt.substring(0, filt.length - 1);
+                _this.activeFilterString = filt;
                 image.css({
                     '-webkit-filter' : filt,
                     'filter' : filt,
+                    'moz-filter' : filt,
+                    'o-filter' : filt
                 });
             },
         },
@@ -617,12 +623,18 @@
         
         saveImage : function(){
             var img = this.$image[0];
-            var blob = new Blob([img.outerHTML], {
-              "type": "text/html"
-            });
+            var can = document.createElement('canvas');
+            var ctx = can.getContext('2d');
+            can.width = img.width;
+            can.height = img.height;
             
-            // create `objectURL` of `blob`
-            var objURL = window.URL.createObjectURL(blob);
+            ctx.filter = this.activeFilterString;
+            //ctx.rotate(this.activeRotate * Math.PI / 180);
+            
+            
+            ctx.drawImage(img, 0, 0, img.width, img.height);
+            
+            var objURL = can.toDataURL('image/png');
             window.location.href = objURL;
         },
         

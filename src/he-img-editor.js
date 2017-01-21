@@ -1,10 +1,8 @@
 /*!
  * HeImgEditor 
  * 
- * Vágás, forgatás, homályosítás, szürkítés, sötétítés-világosítás, szépia. 
- * Pl a homályosítás funkciónál lenne egy csúszka, amivel tudja szabályozni a felhasználó, 
- * a homályosítás mértékét, de a többi funkciónál is ahol van értelme, tennék be ilyet.
- *
+ * Forgatás, homályosítás, szürkítés, sötétítés-világosítás, szépia funckiókat megvalósító képszerkesztő
+ * 
  * Copyright (c) 2017 Huzinecz Erik
  */
 
@@ -20,18 +18,18 @@
         factory(jQuery);
     }
 })(function ($) {
-    
+
     'use strict';
 
     var COMPONENTS = {
-        css : {
-             'jquery-ui' : ['jquery-ui.min.css'],
+        css: {
+            'jquery-ui': ['jquery-ui.min.css'],
         },
-        js : {
-             'jquery-ui' : ['jquery-ui.min.js'],
+        js: {
+            'jquery-ui': ['jquery-ui.min.js'],
         },
     };
-    
+
     // Globals
     var $window = $(window);
     var $document = $(document);
@@ -63,11 +61,9 @@
     var EVENT_WHEEL = 'wheel mousewheel DOMMouseScroll';
     var EVENT_DBLCLICK = 'dblclick';
     var EVENT_LOAD = 'load.' + NAMESPACE;
-    var EVENT_ERROR = 'error.' + NAMESPACE;
     var EVENT_RESIZE = 'resize.' + NAMESPACE; // Bind to window with namespace
     var EVENT_BUILD = 'build.' + NAMESPACE;
     var EVENT_BUILT = 'built.' + NAMESPACE;
-    var EVENT_ZOOM = 'zoom.' + NAMESPACE;
 
     // Classes
     var CLASS_BG = 'he-img-bg';
@@ -78,27 +74,6 @@
     var CLASS_ACTIVE_FUNCTION = 'he-active-func';
     var CLASS_ACTIVE_FUNCTION_EDITOR = 'he-active-func-editor';
 
-
-    // Maths
-    var num = Number;
-    var min = Math.min;
-    var max = Math.max;
-    var abs = Math.abs;
-    var sin = Math.sin;
-    var cos = Math.cos;
-    var sqrt = Math.sqrt;
-    var round = Math.round;
-    var floor = Math.floor;
-
-    var DATA_PREVIEW = 'preview';
-    var DATA_ACTION = 'action';
-
-    // Események
-    var ACTION_ALL = 'all';
-    var ACTION_CROP = 'crop';
-    var ACTION_MOVE = 'move';
-    var ACTION_NONE = 'none';
-    
     function isNumber(n) {
         return typeof n === 'number' && !isNaN(n);
     }
@@ -178,15 +153,15 @@
         this.cropBox = null;
         this.activeFunction = false;
         this.activatedFilters = {
-            blur : 0,
-            grayscale : 0,
-            brightness : 0,
+            blur: 0,
+            grayscale: 0,
+            brightness: 0,
             rotate: 0
         };
         this.filter.allowFilters = {};
         this.activeFilterString = "none";
         this.activeRotate = 0;
-        
+
         this.init();
     }
 
@@ -360,7 +335,7 @@
                 save: $heImgEditor.find('.he-btn-save-img'),
                 addFile: $heImgEditor.find('.he-btn-set-img'),
             };
-            
+
             // Eredeti kép elrejtése
             $this.addClass(CLASS_HIDDEN).after($heImgEditor);
 
@@ -379,279 +354,279 @@
                 this.trigger(EVENT_BUILT);
                 this.isCompleted = true;
             }, this), 0);
-            
+
             this.bindButtonActions();
             this.bindTooltips();
         },
-        
-        bindButtonActions: function(){
+
+        bindButtonActions: function () {
             var _this = this;
-            
-            this.$button.blur.on(EVENT_MOUSE_DOWN, function(e){
-                if(_this.setThisFunctionToActive(e)) return _this.setThisFunctionToInActive(e);
-                
+
+            this.$button.blur.on(EVENT_MOUSE_DOWN, function (e) {
+                if (_this.setThisFunctionToActive(e))
+                    return _this.setThisFunctionToInActive(e);
+
                 var val = _this.activatedFilters.blur;
                 var text = "Homályosítás mértéke";
-                
-                
+
+
                 var options = {
                     min: 0,
                     max: 10,
-                    value : val
+                    value: val
                 };
-                
-                var changeFunc = function(_this, event, ui){
+
+                var changeFunc = function (_this, event, ui) {
                     _this.activatedFilters.blur = ui.value;
-                    _this.filter.blur(_this, ui.value );
+                    _this.filter.blur(_this, ui.value);
                 };
-                
+
                 //_this.generate.slider(_this, options, changeFunc, text).appendTo(_this.$sliderBox);
                 _this.generate.slider(_this, options, changeFunc, text);
                 _this.$sliderBox.removeClass('hide');
             });
-            
-            this.$button.grayscale.on(EVENT_MOUSE_DOWN, function(e){
-                if(_this.setThisFunctionToActive(e)) return _this.setThisFunctionToInActive(e);
-                
+
+            this.$button.grayscale.on(EVENT_MOUSE_DOWN, function (e) {
+                if (_this.setThisFunctionToActive(e))
+                    return _this.setThisFunctionToInActive(e);
+
                 var val = _this.activatedFilters.grayscale;
                 var text = "Szürkítés mértéke";
-                
+
                 var options = {
                     min: 0,
                     max: 10,
-                    value : val
+                    value: val
                 };
-                
-                var changeFunc = function(_this, event, ui){
+
+                var changeFunc = function (_this, event, ui) {
                     _this.activatedFilters.grayscale = ui.value;
-                    _this.filter.grayscale(_this, ui.value );
+                    _this.filter.grayscale(_this, ui.value);
                 };
-                
+
                 //_this.generate.slider(_this, options, changeFunc, text).appendTo(_this.$sliderBox);
                 _this.generate.slider(_this, options, changeFunc, text);
                 _this.$sliderBox.removeClass('hide');
             });
-            
-            this.$button.brightness.on(EVENT_MOUSE_DOWN, function(e){
-                if(_this.setThisFunctionToActive(e)) return _this.setThisFunctionToInActive(e);
-                
+
+            this.$button.brightness.on(EVENT_MOUSE_DOWN, function (e) {
+                if (_this.setThisFunctionToActive(e))
+                    return _this.setThisFunctionToInActive(e);
+
                 var val = _this.activatedFilters.brightness;
                 var text = "Sötétítés-világosítás mértéke";
-                
+
                 var options = {
                     min: -10,
                     max: 10,
-                    value : val
+                    value: val
                 };
-                
-                var changeFunc = function(_this, event, ui){
+
+                var changeFunc = function (_this, event, ui) {
                     _this.activatedFilters.brightness = ui.value;
-                    _this.filter.brightness(_this, ui.value );
+                    _this.filter.brightness(_this, ui.value);
                 };
-                
+
                 //_this.generate.slider(_this, options, changeFunc, text)
                 _this.generate.slider(_this, options, changeFunc, text);
                 _this.$sliderBox.removeClass('hide');
             });
-            
-            this.$button.rotate.on('click', function(e){
+
+            this.$button.rotate.on('click', function (e) {
                 var ROTATE_STEP = 20;
                 var val = _this.activatedFilters.rotate;
                 var type = $(this).attr('data-type');
-                
-                if(type == 'left'){
+
+                if (type == 'left') {
                     val += ROTATE_STEP;
-                }else if(type == 'right'){
+                } else if (type == 'right') {
                     val -= ROTATE_STEP;
                 }
-                
+
                 _this.activeRotate = val;
                 _this.activatedFilters.rotate = val;
                 _this.filter.rotate(_this, val);
             });
-            
-            this.$button.save.on('click', function(e){
+
+            this.$button.save.on('click', function (e) {
                 _this.saveImage();
             });
-            
-            this.$button.addFile.on('click', function(e){
+
+            this.$button.addFile.on('click', function (e) {
                 _this.setNewImage();
             });
-            
+
         },
-        
-        
-        bindTooltips: function(){
+
+        bindTooltips: function () {
             $(document).tooltip();
         },
-        
-        generate : {
-            
-            slider: function(_this, options, changeFunc, text){
+
+        generate: {
+
+            slider: function (_this, options, changeFunc, text) {
                 var html = '<div id="slider" class="he-slider"></div>';
-                   
+
                 var slider = _this.$sliderBoxSlider;
-                if(slider.hasClass('ui-slider')){
+                if (slider.hasClass('ui-slider')) {
                     slider.slider('destroy');
                 }
-                
-                var sliderTooltip = function(event, ui) {
+
+                var sliderTooltip = function (event, ui) {
                     var curValue = ui.value || options.value;
                     var tooltip = '<div class="tooltip"><div class="tooltip-inner">' + curValue + '</div><div class="tooltip-arrow"></div></div>';
                     slider.find('.ui-slider-handle').html(tooltip);
                 }
-                
-                $.extend( options, {
-                    create: function( event, ui ) {
+
+                $.extend(options, {
+                    create: function (event, ui) {
                         sliderTooltip(event, ui);
                     },
-                    slide: function( event, ui ) {
+                    slide: function (event, ui) {
                         sliderTooltip(event, ui);
                         changeFunc(_this, event, ui);
                     }
-                } );
-                
+                });
+
                 slider.slider(options);
-                
+
                 var div = $('<div/>');
-                
+
                 $('<label/>').html(text).appendTo(div);
                 //slider.appendTo(div);
-                
+
                 return div;
             },
-            
-            saveBtn: function(_this){
-                var html = '<button class="save-btn">'+
-                                '<i class="fa fa-floppy-o"></i>'+
-                           '</div>';
+
+            saveBtn: function (_this) {
+                var html = '<button class="save-btn">' +
+                        '<i class="fa fa-floppy-o"></i>' +
+                        '</div>';
                 var btn = $(html);
-                
-                btn.click(function(e){
+
+                btn.click(function (e) {
                     _this.functionIsInActivate(e);
                     _this.$sliderBox.addClass('hide').html('');
                 });
-                
-                return btn;   
+
+                return btn;
             },
-                    
+
         },
-        
+
         filter: {
-            
+
             allowFilters: {},
-            
-            blur : function(_this, val){
-                val = 'blur('+val+'px)';
+
+            blur: function (_this, val) {
+                val = 'blur(' + val + 'px)';
                 this.allowFilters.blur = val;
                 this.applyFilters(_this);
             },
-            grayscale : function(_this, val){
-                val = val*10;
-                val = 'grayscale('+val+'%)';
+            grayscale: function (_this, val) {
+                val = val * 10;
+                val = 'grayscale(' + val + '%)';
                 this.allowFilters.grayscale = val;
                 this.applyFilters(_this);
             },
-            brightness : function(_this, val){
-                val = 100 + val*10;
-                val = 'brightness('+val+'%)';
+            brightness: function (_this, val) {
+                val = 100 + val * 10;
+                val = 'brightness(' + val + '%)';
                 this.allowFilters.brightness = val;
                 this.applyFilters(_this);
             },
-            rotate : function(_this, val){
+            rotate: function (_this, val) {
                 var image = _this.$image;
-                val = 'rotate('+val+'deg)';
-                
+                val = 'rotate(' + val + 'deg)';
+
                 image.css({
                     '-ms-transform': val, /* IE 9 */
                     '-webkit-transform': val, /* Chrome, Safari, Opera */
                     'transform': val
                 });
             },
-            applyFilters : function(_this){
+            applyFilters: function (_this) {
                 var image = _this.$image;
                 var allowF = this.allowFilters;
-                
+
                 var filt = "";
-                for(var k in allowF){
-                    filt += allowF[k]+" ";
+                for (var k in allowF) {
+                    filt += allowF[k] + " ";
                 }
                 filt = filt.substring(0, filt.length - 1);
                 _this.activeFilterString = filt;
                 image.css({
-                    '-webkit-filter' : filt,
-                    'filter' : filt,
-                    'moz-filter' : filt,
-                    'o-filter' : filt
+                    '-webkit-filter': filt,
+                    'filter': filt,
+                    'moz-filter': filt,
+                    'o-filter': filt
                 });
             },
         },
-        
-        
+
         /**
          * Egy funkció aktiválása
          * @param {type} e
          * @returns {Boolean}
          */
-        setThisFunctionToActive: function(e){
+        setThisFunctionToActive: function (e) {
             var $target = $(e.currentTarget);
-            if(this.activeFunction == $target.attr('data-function')){
+            if (this.activeFunction == $target.attr('data-function')) {
                 return true;
             }
-            
+
             this.activeFunction = $target.attr('data-function');
             $target.siblings('div').removeClass(CLASS_ACTIVE_FUNCTION);
             $target.addClass(CLASS_ACTIVE_FUNCTION);
-            
+
             return false;
         },
-        
+
         /**
          * Egy funkció inaktiválása
          * @param {type} e
          * @returns {Boolean}
          */
-        setThisFunctionToInActive: function(e){
+        setThisFunctionToInActive: function (e) {
             var $target = $(e.currentTarget);
-            if(this.activeFunction != $target.attr('data-function')){
+            if (this.activeFunction != $target.attr('data-function')) {
                 return true;
             }
-            
+
             this.activeFunction = false;
             $target.removeClass(CLASS_ACTIVE_FUNCTION);
             // Elrejtjük a csúszkát
             this.$sliderBox.addClass('hide');
-            
+
             return false;
         },
-        
-        
-        saveImage : function(){
+
+        saveImage: function () {
             var img = this.$image[0];
             var can = document.createElement('canvas');
             var ctx = can.getContext('2d');
             can.width = img.width;
             can.height = img.height;
-            
+
             ctx.filter = this.activeFilterString;
-            //ctx.rotate(this.activeRotate * Math.PI / 180);
-            
-            
+            //ctx.rotate(this.activeRotate * Math.PI / 180); // FIXME: Még nem működik a forgatás mentése
+
+
             ctx.drawImage(img, 0, 0, img.width, img.height);
-            
+
             var objURL = can.toDataURL('image/png');
             window.location.href = objURL;
         },
-        
-        setNewImage : function(){
+
+        setNewImage: function () {
             var _this = this;
             var f = $('<input/>').attr('type', 'file');
-            
+
             f.attr('accept', '.jpg,.png,.jpeg');
-            
-            f.change(function(){
+
+            f.change(function () {
                 var files = $(this)[0].files;
-                
+
                 var reader = new FileReader();
 
                 reader.onload = function (e) {
@@ -666,11 +641,11 @@
 
                 reader.readAsDataURL(files[0]);
             });
-            
+
             f.click();
         },
-        
-        destroy: function(){
+
+        destroy: function () {
             this.$heImgEditor.remove();
         },
 
@@ -689,7 +664,6 @@
                     on(EVENT_MOUSE_UP, (this._cropEnd = proxy(this.cropEnd, this)));
         },
 
-        
         renderImage: function (isChanged) {
             var canvas = this.canvas;
             var image = this.image;
@@ -708,7 +682,6 @@
                 marginTop: image.top
             });
         },
-
 
         startCutFunction: function (event, mode) {
             if (this.cutIsStarted) {
@@ -749,20 +722,9 @@
     }
 
 
-    HeImgEditor.DEFAULTS = {
-        // Háttér megjelenítése
-        background: true,
-
+    HeImgEditor.DEFAULTS = { // TODO: Ezt még lehetne bővíteni
         // Képarány
         aspectRatio: NaN,
-
-        // Konténer méretezése
-        minContainerWidth: 200,
-        minContainerHeight: 100,
-
-        // nézet módja
-        viewMode: 0, // 0, 1, 2, 3
-
     };
 
     HeImgEditor.setDefaults = function (options) {
@@ -770,36 +732,36 @@
     };
 
 
-    function getTemplate(){
+    function getTemplate() {
         var t = `<div class="he-holder">
             <div class="he-editor-panel">
                 <div class="he-btns">
                     <div class="he-btn he-btn-set-img">
-                        <img src="`+JSFileParentPath+`/img/upl.png">
+                        <img src="` + JSFileParentPath + `/img/upl.png">
                         <span>Kép feltöltése</span>
                     </div>
                     <div class="he-btn he-btn-save-img">
-                        <img src="`+JSFileParentPath+`/img/save.png">
+                        <img src="` + JSFileParentPath + `/img/save.png">
                         <span>Kép mentése</span>
                     </div>
                     <div class="he-btn he-btn-c-blur"  data-function="blur" >
-                        <img src="`+JSFileParentPath+`/img/blur.jpg">
+                        <img src="` + JSFileParentPath + `/img/blur.jpg">
                         <span>Homályosítás</span>
                     </div>
                     <div class="he-btn he-btn-c-grayscale" data-function="grayscale">
-                        <img src="`+JSFileParentPath+`/img/grayscale.png">
+                        <img src="` + JSFileParentPath + `/img/grayscale.png">
                         <span>Szürkítés</span>
                     </div>
                     <div class="he-btn he-btn-c-brightness" data-function="brightness">
-                        <img src="`+JSFileParentPath+`/img/brightness.png">
+                        <img src="` + JSFileParentPath + `/img/brightness.png">
                         <span>Fényerő</span>
                     </div>
                     <div class="he-btn he-btn-c-rotate"  data-function="rotate" data-type="left">
-                        <img src="`+JSFileParentPath+`/img/rotate_left.png">
+                        <img src="` + JSFileParentPath + `/img/rotate_left.png">
                         <span>Forgatás balra</span>
                     </div>
                     <div class="he-btn he-btn-c-rotate" data-function="rotate" data-type="right">
-                        <img src="`+JSFileParentPath+`/img/rotate_right.png">
+                        <img src="` + JSFileParentPath + `/img/rotate_right.png">
                         <span>Forgatás jobbra</span>
                     </div>
                 </div>
@@ -813,47 +775,10 @@
                 </div>
             </div>
         </div>`;
-        
+
         return t;
     }
-    
-    HeImgEditor.TEMPLATEOLD = (
-            '<div class="heimgeditor-container">' +
-                '<div class="heimgeditor-wrap-box">' +
-                    '<div class="heimgeditor-canvas"></div>' +
-                '</div>' +
-                '<div class="heimgeditor-controls">' +
-                    '<div class="heimgeditor-c-crop heimgeditor-btn"><i class="fa fa-cut"></i></div>' +
-                    '<div class="heimgeditor-c-blur heimgeditor-btn" data-function="blur" title="Homályosítás effekt"><i class="fa fa-eercast"></i></div>' +
-                    '<div class="heimgeditor-c-grayscale heimgeditor-btn" data-function="grayscale" title="Szürkítés effekt"><i class="fa fa-adjust"></i></div>' +
-                    '<div class="heimgeditor-c-brightness heimgeditor-btn" data-function="brightness" title="Sötétítés-világosítás effekt"><i class="fa fa-adjust"></i></div>' +
-                    '<div class="heimgeditor-c-rotate heimgeditor-btn" data-function="rotate" data-type="left" title="Forgatás balra"><i class="fa fa-undo"></i></div>' +
-                    '<div class="heimgeditor-c-rotate heimgeditor-btn" data-function="rotate" data-type="right" title="Forgatás jobbra"><i class="fa fa-repeat"></i></div>' +
-                    '<div class="heimgeditor-save heimgeditor-btn he-functional" data-function="save" title="Kép mentése a számítógépre"><i class="fa fa-floppy-o"></i></div>' +
-                '</div>' +
-                /*
-                '<div class="heimgeditor-drag-box"></div>' +
-                '<div class="heimgeditor-crop-box">' +
-                    '<span class="heimgeditor-view-box"></span>' +
-                    '<span class="heimgeditor-center"></span>' +
-                    '<span class="heimgeditor-face"></span>' +
-                    '<span class="heimgeditor-line line-e" data-action="e"></span>' +
-                    '<span class="heimgeditor-line line-n" data-action="n"></span>' +
-                    '<span class="heimgeditor-line line-w" data-action="w"></span>' +
-                    '<span class="heimgeditor-line line-s" data-action="s"></span>' +
-                    '<span class="heimgeditor-point point-e" data-action="e"></span>' +
-                    '<span class="heimgeditor-point point-n" data-action="n"></span>' +
-                    '<span class="heimgeditor-point point-w" data-action="w"></span>' +
-                    '<span class="heimgeditor-point point-s" data-action="s"></span>' +
-                    '<span class="heimgeditor-point point-ne" data-action="ne"></span>' +
-                    '<span class="heimgeditor-point point-nw" data-action="nw"></span>' +
-                    '<span class="heimgeditor-point point-sw" data-action="sw"></span>' +
-                    '<span class="heimgeditor-point point-se" data-action="se"></span>' +
-                '</div>' +
-                */
-                '<div class="heimgeditor-slider-box hide"></div>' +
-            '</div>' 
-            );
+
 
 
     // Save the other cropper
@@ -895,40 +820,40 @@
         $.fn.heimgeditor = HeImgEditor.other;
         return this;
     };
-    
-    
+
+
     // Ez a rész deríti ki a javascript helyét
-    var fnFullFilePathToFileParentPath = function(JSFullFilePath){
+    var fnFullFilePathToFileParentPath = function (JSFullFilePath) {
         var JSFileParentPath = '';
-        if(JSFullFilePath) {
-            JSFileParentPath = JSFullFilePath.substring(0,JSFullFilePath.lastIndexOf('/')+1);
+        if (JSFullFilePath) {
+            JSFileParentPath = JSFullFilePath.substring(0, JSFullFilePath.lastIndexOf('/') + 1);
         } else {
             JSFileParentPath = null;
         }
         return JSFileParentPath;
     };
 
-    var fnExceptionToFullFilePath = function(e){
+    var fnExceptionToFullFilePath = function (e) {
         var JSFullFilePath = '';
 
-        if(e.fileName) {    // firefox
+        if (e.fileName) {    // firefox
             JSFullFilePath = e.fileName;
         } else if (e.stacktrace) {  // opera
             var tempStackTrace = e.stacktrace;
             tempStackTrace = tempStackTrace.substr(tempStackTrace.indexOf('http'));
-            tempStackTrace = tempStackTrace.substr(0,tempStackTrace.indexOf('Dummy Exception'));
-            tempStackTrace = tempStackTrace.substr(0,tempStackTrace.lastIndexOf(':'));
+            tempStackTrace = tempStackTrace.substr(0, tempStackTrace.indexOf('Dummy Exception'));
+            tempStackTrace = tempStackTrace.substr(0, tempStackTrace.lastIndexOf(':'));
             JSFullFilePath = tempStackTrace;
         } else if (e.stack) {   // firefox, opera, chrome
-            (function(){
+            (function () {
                 var str = e.stack;
                 var tempStr = str;
 
                 var strProtocolSeparator = '://';
-                var idxProtocolSeparator = tempStr.indexOf(strProtocolSeparator)+strProtocolSeparator.length;
+                var idxProtocolSeparator = tempStr.indexOf(strProtocolSeparator) + strProtocolSeparator.length;
 
                 var tempStr = tempStr.substr(idxProtocolSeparator);
-                if(tempStr.charAt(0)=='/') {
+                if (tempStr.charAt(0) == '/') {
                     tempStr = tempStr.substr(1);
                     idxProtocolSeparator++;
                 }
@@ -937,7 +862,7 @@
                 tempStr = tempStr.substr(tempStr.indexOf('/'));
 
                 var idxFileNameEndSeparator = tempStr.indexOf(':');
-                var finalStr = (str.substr(0,idxProtocolSeparator + idxHostSeparator + idxFileNameEndSeparator));
+                var finalStr = (str.substr(0, idxProtocolSeparator + idxHostSeparator + idxFileNameEndSeparator));
                 finalStr = finalStr.substr(finalStr.indexOf('http'));
                 JSFullFilePath = finalStr;
             }());
@@ -948,11 +873,11 @@
         return JSFullFilePath;
     };
 
-    var fnExceptionToFileParentPath = function(e){
+    var fnExceptionToFileParentPath = function (e) {
         return fnFullFilePathToFileParentPath(fnExceptionToFullFilePath(e));
     };
 
-    var fnGetJSFileParentPath = function() {
+    var fnGetJSFileParentPath = function () {
         try {
             throw new Error('Dummy Exception');
         } catch (e) {
@@ -962,13 +887,13 @@
 
     var JSFileParentPath = fnGetJSFileParentPath();
     // VÉGE Ez a rész deríti ki a javascript helyét VÉGE
-    
-    
+
+
     // LOAD COMPONENTS
     // JS
-    for(var c in COMPONENTS.js){
-        for(var ck in COMPONENTS.js[c]){
-            var url = JSFileParentPath+'components/'+c+'/'+COMPONENTS.js[c][ck];
+    for (var c in COMPONENTS.js) {
+        for (var ck in COMPONENTS.js[c]) {
+            var url = JSFileParentPath + 'components/' + c + '/' + COMPONENTS.js[c][ck];
             $.ajax({
                 url: url,
                 dataType: "script",
@@ -976,13 +901,13 @@
             });
         }
     }
-    
+
     // CSS
-    for(var c in COMPONENTS.css){
-        for(var ck in COMPONENTS.css[c]){
-            var url = JSFileParentPath+'components/'+c+'/'+COMPONENTS.css[c][ck];
-            $('head').append( $('<link rel="stylesheet" type="text/css" />').attr('href', url) );
+    for (var c in COMPONENTS.css) {
+        for (var ck in COMPONENTS.css[c]) {
+            var url = JSFileParentPath + 'components/' + c + '/' + COMPONENTS.css[c][ck];
+            $('head').append($('<link rel="stylesheet" type="text/css" />').attr('href', url));
         }
     }
-    
+
 });

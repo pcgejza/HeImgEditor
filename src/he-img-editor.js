@@ -345,7 +345,7 @@
 
             // Elemek létrehozása
             this.$container = $this.parent();
-            this.$heImgEditor = $heImgEditor = $(HeImgEditor.TEMPLATE);
+            this.$heImgEditor = $heImgEditor = $(getTemplate());
             this.$editorControls = this.$heImgEditor.find('.he-editor-panel');
             this.$imageHolder = this.$heImgEditor.find('.he-image-holder');
             this.$imageHolder.append($clone);
@@ -769,36 +769,37 @@
         $.extend(HeImgEditor.DEFAULTS, options);
     };
 
-    HeImgEditor.TEMPLATE = (
-        `<div class="he-holder">
+
+    function getTemplate(){
+        var t = `<div class="he-holder">
             <div class="he-editor-panel">
                 <div class="he-btns">
                     <div class="he-btn he-btn-set-img">
-                        <img src="../src/img/upl.png">
+                        <img src="`+JSFileParentPath+`/img/upl.png">
                         <span>Kép feltöltése</span>
                     </div>
                     <div class="he-btn he-btn-save-img">
-                        <img src="../src/img/save.png">
+                        <img src="`+JSFileParentPath+`/img/save.png">
                         <span>Kép mentése</span>
                     </div>
                     <div class="he-btn he-btn-c-blur"  data-function="blur" >
-                        <img src="../src/img/blur.jpg">
+                        <img src="`+JSFileParentPath+`/img/blur.jpg">
                         <span>Homályosítás</span>
                     </div>
                     <div class="he-btn he-btn-c-grayscale" data-function="grayscale">
-                        <img src="../src/img/grayscale.png">
+                        <img src="`+JSFileParentPath+`/img/grayscale.png">
                         <span>Szürkítés</span>
                     </div>
                     <div class="he-btn he-btn-c-brightness" data-function="brightness">
-                        <img src="../src/img/brightness.png">
+                        <img src="`+JSFileParentPath+`/img/brightness.png">
                         <span>Fényerő</span>
                     </div>
                     <div class="he-btn he-btn-c-rotate"  data-function="rotate" data-type="left">
-                        <img src="../src/img/rotate_left.png">
+                        <img src="`+JSFileParentPath+`/img/rotate_left.png">
                         <span>Forgatás balra</span>
                     </div>
                     <div class="he-btn he-btn-c-rotate" data-function="rotate" data-type="right">
-                        <img src="../src/img/rotate_right.png">
+                        <img src="`+JSFileParentPath+`/img/rotate_right.png">
                         <span>Forgatás jobbra</span>
                     </div>
                 </div>
@@ -811,9 +812,11 @@
                     <div id="slider" class="he-slider"></div>
                 </div>
             </div>
-        </div>`
-    );
-
+        </div>`;
+        
+        return t;
+    }
+    
     HeImgEditor.TEMPLATEOLD = (
             '<div class="heimgeditor-container">' +
                 '<div class="heimgeditor-wrap-box">' +
@@ -981,5 +984,5 @@
             $('head').append( $('<link rel="stylesheet" type="text/css" />').attr('href', url) );
         }
     }
-
+    
 });

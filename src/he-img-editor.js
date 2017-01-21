@@ -161,6 +161,10 @@
         this.filter.allowFilters = {};
         this.activeFilterString = "none";
         this.activeRotate = 0;
+        this.imageData = {
+            width: 0,
+            height: 0
+        };
 
         this.init();
     }
@@ -433,7 +437,7 @@
             });
 
             this.$button.rotate.on('click', function (e) {
-                var ROTATE_STEP = 20;
+                var ROTATE_STEP = 90;
                 var val = _this.activatedFilters.rotate;
                 var type = $(this).attr('data-type');
 
@@ -539,10 +543,19 @@
                 var image = _this.$image;
                 val = 'rotate(' + val + 'deg)';
 
+                if(_this.imageData.width == 0){
+                    _this.imageData.width = _this.$image.width();
+                    _this.imageData.height = _this.$image.height();
+                }
+
+                var currentWidth = _this.$image.width();
+                var currentHeight = _this.$image.height();
+
                 image.css({
                     '-ms-transform': val, /* IE 9 */
                     '-webkit-transform': val, /* Chrome, Safari, Opera */
-                    'transform': val
+                    'transform': val,
+                    'width' : currentHeight != _this.imageData.height ?  _this.imageData.width : currentHeight
                 });
             },
             applyFilters: function (_this) {
